@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberGuard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="extension-container" class="extension-popup">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="brand">
+                    <i class="fas fa-shield-alt"></i>
+                    <div class="brand-text">
+                        <h1>CyberGuard</h1>
+                        <p>Security Analysis</p>
+                    </div>
+                </div>
+                <div class="header-controls">
+                    <button id="refresh-btn" class="icon-btn" title="Refresh Scan">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button id="settings-btn" class="icon-btn" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="page-info">
+                <i class="fas fa-globe"></i>
+                <span>Analyzing:</span>
+                <span id="current-url" class="url-text">Loading...</span>
+            </div>
+            <div class="scan-status">
+                <div class="status-left">
+                    <div id="loading-spinner" class="spinner"></div>
+                    <span id="scan-status-text">Scanning page...</span>
+                </div>
+                <button id="rescan-btn" class="rescan-btn">
+                    <i class="fas fa-redo-alt"></i>
+                    Rescan
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" data-tab="ips">
+                <i class="fas fa-server"></i>
+                IPs (<span id="ip-count">0</span>)
+            </button>
+            <button class="tab-btn" data-tab="domains">
+                <i class="fas fa-globe"></i>
+                Domains (<span id="domain-count">0</span>)
+            </button>
+            <button class="tab-btn" data-tab="analysis">
+                <i class="fas fa-brain"></i>
+                AI Analysis
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- IPs Tab -->
+            <div id="ips-tab" class="tab-panel active">
+                <div class="tab-header">
+                    <h3>Detected IP Addresses</h3>
+                    <span id="ip-last-scan" class="last-scan">Last scan: Never</span>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-content">
+                        <div class="summary-text">
+                            <div class="summary-title">Threat Summary</div>
+                            <div class="threat-counts">
+                                <span class="count-safe">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="safe-ips">0 Safe</span>
+                                </span>
+                                <span class="count-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span id="suspicious-ips">0 Suspicious</span>
+                                </span>
+                                <span class="count-danger">
+                                    <i class="fas fa-ban"></i>
+                                    <span id="malicious-ips">0 Malicious</span>
+                                </span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chart-pie summary-icon"></i>
+                    </div>
+                </div>
+                <div id="ip-list" class="item-list">
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>No IP addresses detected yet. Click "Rescan" to analyze the page.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Domains Tab -->
+            <div id="domains-tab" class="tab-panel">
+                <div class="tab-header">
+                    <h3>Detected Domains</h3>
+                    <span id="domain-last-scan" class="last-scan">Last scan: Never</span>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-content">
+                        <div class="summary-text">
+                            <div class="summary-title">Domain Summary</div>
+                            <div class="threat-counts">
+                                <span class="count-safe">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="safe-domains">0 Safe</span>
+                                </span>
+                                <span class="count-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span id="suspicious-domains">0 Suspicious</span>
+                                </span>
+                                <span class="count-danger">
+                                    <i class="fas fa-ban"></i>
+                                    <span id="malicious-domains">0 Malicious</span>
+                                </span>
+                            </div>
+                        </div>
+                        <i class="fas fa-globe summary-icon"></i>
+                    </div>
+                </div>
+                <div id="domain-list" class="item-list">
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>No domains detected yet. Click "Rescan" to analyze the page.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Analysis Tab -->
+            <div id="analysis-tab" class="tab-panel">
+                <div class="tab-header">
+                    <h3>AI Threat Analysis</h3>
+                    <span id="analysis-last-scan" class="last-scan">Analyzed: Never</span>
+                </div>
+                <div id="ai-analysis-content">
+                    <div class="empty-state">
+                        <i class="fas fa-brain"></i>
+                        <p>No analysis available yet. Scan the page to get AI-powered threat insights.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-status">
+                <i class="fas fa-clock"></i>
+                <span>Last scan: <span id="last-scan-time">Never</span></span>
+            </div>
+            <div class="api-status">
+                <span id="api-status-dot" class="status-dot offline"></span>
+                <span>APIs: <span id="api-status-text">Checking...</span></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
