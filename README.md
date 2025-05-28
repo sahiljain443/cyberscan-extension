@@ -22,7 +22,6 @@ A powerful Chrome extension designed for cybersecurity professionals that perfor
 - **Pattern Recognition**: Identifies suspicious patterns and relationships between network resources
 
 ### 🎨 **Professional Interface**
-- **Clean Orange Theme**: Professional cybersecurity-focused design
 - **Tabbed Interface**: Separate views for IPs, Domains, and AI Analysis
 - **Real-time Updates**: Live scanning status and progress indicators
 - **Copy Functionality**: One-click copying of IPs and domains for further investigation
