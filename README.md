@@ -1,10 +1,7 @@
-# CyberGuard - Chrome Security Extension
+# CyberScan - Chrome Security Extension
 
 A powerful Chrome extension designed for cybersecurity professionals that performs real-time webpage analysis, threat intelligence lookups, and AI-powered security assessments.
 
-![CyberGuard](https://img.shields.io/badge/CyberGuard-Security%20Extension-orange?style=for-the-badge)
-![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?style=for-the-badge&logo=googlechrome)
-![AI Powered](https://img.shields.io/badge/AI-Powered-00D4AA?style=for-the-badge)
 
 ## 🛡️ Features
 
@@ -44,8 +41,8 @@ A powerful Chrome extension designed for cybersecurity professionals that perfor
 
 1. **Download the Extension**:
    ```bash
-   git clone https://github.com/yourusername/cyberguard-extension.git
-   cd cyberguard-extension
+   git clone https://github.com/sahiljain443/cyberscan-extension.git
+   cd cyberscan-extension
    ```
 
 2. **Open Chrome Extensions**:
@@ -57,7 +54,7 @@ A powerful Chrome extension designed for cybersecurity professionals that perfor
    - Select the `chrome-extension` folder from the project directory
 
 4. **Verify Installation**:
-   - The CyberGuard icon should appear in your Chrome toolbar
+   - The cyberscan icon should appear in your Chrome toolbar
    - Extension is ready to use!
 
 ### Method 2: Install from Chrome Web Store
@@ -133,7 +130,7 @@ The extension requires a backend server for API integrations:
 ### Basic Usage
 
 1. **Navigate to Any Website**: Open any webpage you want to analyze
-2. **Click CyberGuard Icon**: Find the orange shield icon in your Chrome toolbar
+2. **Click cyberscan Icon**: Find the orange shield icon in your Chrome toolbar
 3. **View Analysis**: The extension will automatically scan and analyze the page
 
 ### Understanding the Interface
@@ -172,7 +169,7 @@ The extension requires a backend server for API integrations:
 ## 🏗️ Project Structure
 
 ```
-cyberguard-extension/
+cyberscan-extension/
 ├── chrome-extension/          # Chrome extension files
 │   ├── manifest.json         # Extension manifest
 │   ├── popup.html           # Extension popup interface
@@ -207,8 +204,8 @@ cyberguard-extension/
 
 1. **Clone Repository**:
    ```bash
-   git clone https://github.com/yourusername/cyberguard-extension.git
-   cd cyberguard-extension
+   git clone https://github.com/sahiljain443/cyberscan-extension.git
+   cd cyberscan-extension
    ```
 
 2. **Install Dependencies**:
