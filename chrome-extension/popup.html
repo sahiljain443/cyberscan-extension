@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberGuard</title>
+    <title>CyberScanAI</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,7 +16,7 @@
                 <div class="brand">
                     <i class="fas fa-shield-alt"></i>
                     <div class="brand-text">
-                        <h1>CyberGuard</h1>
+                        <h1>CyberScanAI</h1>
                         <p>Security Analysis</p>
                     </div>
                 </div>
@@ -67,17 +67,17 @@
                         <div class="summary-text">
                             <div class="summary-title">Threat Summary</div>
                             <div class="threat-counts">
-                                <span class="count-safe">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span id="safe-ips">0 Safe</span>
+                                <span class="count-danger">
+                                    <i class="fas fa-ban"></i>
+                                    <span id="malicious-ips">0 Malicious</span>
                                 </span>
                                 <span class="count-warning">
                                     <i class="fas fa-exclamation-triangle"></i>
                                     <span id="suspicious-ips">0 Suspicious</span>
                                 </span>
-                                <span class="count-danger">
-                                    <i class="fas fa-ban"></i>
-                                    <span id="malicious-ips">0 Malicious</span>
+                                <span class="count-safe">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="safe-ips">0 Safe</span>
                                 </span>
                             </div>
                         </div>
@@ -103,17 +103,17 @@
                         <div class="summary-text">
                             <div class="summary-title">Domain Summary</div>
                             <div class="threat-counts">
-                                <span class="count-safe">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span id="safe-domains">0 Safe</span>
+                                <span class="count-danger">
+                                    <i class="fas fa-ban"></i>
+                                    <span id="malicious-domains">0 Malicious</span>
                                 </span>
                                 <span class="count-warning">
                                     <i class="fas fa-exclamation-triangle"></i>
                                     <span id="suspicious-domains">0 Suspicious</span>
                                 </span>
-                                <span class="count-danger">
-                                    <i class="fas fa-ban"></i>
-                                    <span id="malicious-domains">0 Malicious</span>
+                                <span class="count-safe">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="safe-domains">0 Safe</span>
                                 </span>
                             </div>
                         </div>
@@ -134,10 +134,20 @@
                     <h3>AI Threat Analysis</h3>
                     <span id="analysis-last-scan" class="last-scan">Analyzed: Never</span>
                 </div>
+                <div class="ai-analysis-controls">
+                    <button id="start-ai-analysis" class="btn-primary" style="display: none;">
+                        <i class="fas fa-brain"></i>
+                        Start AI Analysis
+                    </button>
+                    <div id="ai-analysis-loading" class="analysis-loading" style="display: none;">
+                        <div class="spinner"></div>
+                        <span>Analyzing with AI...</span>
+                    </div>
+                </div>
                 <div id="ai-analysis-content">
                     <div class="empty-state">
                         <i class="fas fa-brain"></i>
-                        <p>No analysis available yet. Scan the page to get AI-powered threat insights.</p>
+                        <p>No analysis available yet. First scan the page for IPs and domains, then click "Start AI Analysis" for AI-powered threat insights.</p>
                     </div>
                 </div>
             </div>
@@ -152,6 +162,63 @@
             <div class="api-status">
                 <span id="api-status-dot" class="status-dot offline"></span>
                 <span>APIs: <span id="api-status-text">Checking...</span></span>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-cog"></i> API Settings</h2>
+                    <button id="close-settings" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <label for="virustotal-key">VirusTotal API Key</label>
+                        <div class="api-key-input">
+                            <input type="password" id="virustotal-key" placeholder="Enter VirusTotal API key..." autocomplete="off">
+                            <button type="button" class="toggle-visibility" data-target="virustotal-key">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="field-description">Get your free API key from <a href="https://www.virustotal.com/gui/my-apikey" target="_blank">VirusTotal</a></div>
+                    </div>
+
+                    <div class="settings-section">
+                        <label for="abuseipdb-key">AbuseIPDB API Key</label>
+                        <div class="api-key-input">
+                            <input type="password" id="abuseipdb-key" placeholder="Enter AbuseIPDB API key..." autocomplete="off">
+                            <button type="button" class="toggle-visibility" data-target="abuseipdb-key">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="field-description">Get your free API key from <a href="https://www.abuseipdb.com/api" target="_blank">AbuseIPDB</a></div>
+                    </div>
+
+                                            <div class="settings-section">
+                            <label for="anthropic-key">Anthropic API Key</label>
+                            <div class="api-key-input">
+                                <input type="password" id="anthropic-key" placeholder="Enter Anthropic API key..." autocomplete="off">
+                                <button type="button" class="toggle-visibility" data-target="anthropic-key">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="field-description">Get your API key from <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a></div>
+                        </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button id="save-settings" class="btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Settings
+                    </button>
+                    <button id="cancel-settings" class="btn-secondary">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
     </div>

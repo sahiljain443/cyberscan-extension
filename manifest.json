@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "CyberGuard - Security Analysis Extension",
+  "version": "1.0.0",
+  "description": "Advanced cybersecurity tool for threat intelligence and network analysis",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "chrome-extension/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["chrome-extension/content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "chrome-extension/popup.html",
+    "default_title": "CyberGuard Security Analysis"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["chrome-extension/content.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+} 

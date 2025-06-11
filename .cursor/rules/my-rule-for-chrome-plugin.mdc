@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+This rule is helpful in defining the requirements of the Chrome plugin project "Cyberscan-extension".
+Assume that this plugin will be used by a cybersecurity analyst to investigate alerts and to get a fair analysis from LLM.  
+This plugin is supposed to capture the valid IP addresses and domains visible on the webpage. These IPs and domains are typically part of a security alert and are potentially malicious.
+To check the maliciousness of the IPs and Domains send API request to Virutotal and AbuseIPDB using the API token in JSON format. Expect the response in JSON format and adjust the response to show the relevant data in appropriate sections of the popup.
+Leverage the LLM API to send the webpage/alert content along with the Virustotal and AbuseIPDb response to the LLM for analysis.
+LLM response should contain the analysis and recommendation for next steps for the security analyst.
