@@ -1,5 +1,5 @@
 // Popup script for extension interface
-class CyberGuardPopup {
+class CyberScanAIPopup {
     constructor() {
         this.currentTab = 'ips';
         this.scanData = null;
@@ -10,32 +10,54 @@ class CyberGuardPopup {
 
     async init() {
         this.setupEventListeners();
-        this.updateCurrentUrl();
+        // this.updateCurrentUrl();  // Commented out as not needed
         await this.checkApiStatus();
         await this.loadLastScanData();
+        
+        // Automatically start scanning when popup opens
+        console.log('Scanning page for threats...');
+        await this.rescanPage();
     }
 
     setupEventListeners() {
-        // Tab switching
+        // Tab navigation
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const tab = e.currentTarget.dataset.tab;
-                this.switchTab(tab);
+                const tabName = e.currentTarget.dataset.tab;
+                this.switchTab(tabName);
             });
         });
 
-        // Refresh and rescan buttons
-        document.getElementById('refresh-btn').addEventListener('click', () => {
-            this.rescanPage();
-        });
+        // Refresh button
+        const refreshBtn = document.getElementById('refresh-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                this.rescanPage();
+            });
+        }
 
-        document.getElementById('rescan-btn').addEventListener('click', () => {
-            this.rescanPage();
-        });
+        // Settings button
+        const settingsBtn = document.getElementById('settings-btn');
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                this.openSettings();
+            });
+        }
 
-        // Copy buttons (delegated event listener)
+        // Start AI Analysis button
+        const startAIAnalysisBtn = document.getElementById('start-ai-analysis');
+        if (startAIAnalysisBtn) {
+            startAIAnalysisBtn.addEventListener('click', () => {
+                this.startAIAnalysis();
+            });
+        }
+
+        // Settings modal event listeners
+        this.setupSettingsListeners();
+
+        // Copy button handlers
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('copy-btn') || e.target.closest('.copy-btn')) {
+            if (e.target.closest('.copy-btn')) {
                 this.copyToClipboard(e);
             }
         });
@@ -48,6 +70,45 @@ class CyberGuardPopup {
         });
     }
 
+    setupSettingsListeners() {
+        // Close modal buttons
+        document.getElementById('close-settings')?.addEventListener('click', () => {
+            this.closeSettings();
+        });
+        
+        document.getElementById('cancel-settings')?.addEventListener('click', () => {
+            this.closeSettings();
+        });
+
+        // Save settings button
+        document.getElementById('save-settings')?.addEventListener('click', () => {
+            this.saveSettings();
+        });
+
+        // Toggle password visibility buttons
+        document.querySelectorAll('.toggle-visibility').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.togglePasswordVisibility(e.target.closest('.toggle-visibility').dataset.target);
+            });
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('settings-modal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'settings-modal') {
+                this.closeSettings();
+            }
+        });
+
+        // Escape key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('settings-modal').classList.contains('show')) {
+                this.closeSettings();
+            }
+        });
+    }
+
+    // Commented out as not needed
+    /*
     async updateCurrentUrl() {
         try {
             const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -60,6 +121,7 @@ class CyberGuardPopup {
             document.getElementById('current-url').textContent = 'Unknown';
         }
     }
+    */
 
     switchTab(tabName) {
         // Update tab buttons
@@ -162,16 +224,46 @@ class CyberGuardPopup {
         const { analysis } = this.scanData;
         
         // Update IP counts
-        document.getElementById('ip-count').textContent = analysis.summary.ips.total;
-        document.getElementById('safe-ips').textContent = `${analysis.summary.ips.safe} Safe`;
-        document.getElementById('suspicious-ips').textContent = `${analysis.summary.ips.suspicious} Suspicious`;
-        document.getElementById('malicious-ips').textContent = `${analysis.summary.ips.malicious} Malicious`;
+        const ipCount = document.getElementById('ip-count');
+        if (ipCount) {
+            ipCount.textContent = analysis.summary.ips.total;
+        }
+        
+        const safeIPs = document.getElementById('safe-ips');
+        if (safeIPs) {
+            safeIPs.textContent = `${analysis.summary.ips.safe} Safe`;
+        }
+        
+        const suspiciousIPs = document.getElementById('suspicious-ips');
+        if (suspiciousIPs) {
+            suspiciousIPs.textContent = `${analysis.summary.ips.suspicious} Suspicious`;
+        }
+        
+        const maliciousIPs = document.getElementById('malicious-ips');
+        if (maliciousIPs) {
+            maliciousIPs.textContent = `${analysis.summary.ips.malicious} Malicious`;
+        }
 
         // Update domain counts
-        document.getElementById('domain-count').textContent = analysis.summary.domains.total;
-        document.getElementById('safe-domains').textContent = `${analysis.summary.domains.safe} Safe`;
-        document.getElementById('suspicious-domains').textContent = `${analysis.summary.domains.suspicious} Suspicious`;
-        document.getElementById('malicious-domains').textContent = `${analysis.summary.domains.malicious} Malicious`;
+        const domainCount = document.getElementById('domain-count');
+        if (domainCount) {
+            domainCount.textContent = analysis.summary.domains.total;
+        }
+        
+        const safeDomains = document.getElementById('safe-domains');
+        if (safeDomains) {
+            safeDomains.textContent = `${analysis.summary.domains.safe} Safe`;
+        }
+        
+        const suspiciousDomains = document.getElementById('suspicious-domains');
+        if (suspiciousDomains) {
+            suspiciousDomains.textContent = `${analysis.summary.domains.suspicious} Suspicious`;
+        }
+        
+        const maliciousDomains = document.getElementById('malicious-domains');
+        if (maliciousDomains) {
+            maliciousDomains.textContent = `${analysis.summary.domains.malicious} Malicious`;
+        }
     }
 
     updateIPsList() {
@@ -188,7 +280,13 @@ class CyberGuardPopup {
             return;
         }
 
-        container.innerHTML = ips.map(ip => this.createIPCard(ip)).join('');
+        // Sort IPs by threat level: Malicious → Suspicious → Clean
+        const sortedIPs = ips.sort((a, b) => {
+            const threatOrder = { 'malicious': 0, 'suspicious': 1, 'safe': 2, 'unknown': 3 };
+            return threatOrder[a.threat_level] - threatOrder[b.threat_level];
+        });
+
+        container.innerHTML = sortedIPs.map(ip => this.createIPCard(ip)).join('');
     }
 
     updateDomainsList() {
@@ -205,24 +303,131 @@ class CyberGuardPopup {
             return;
         }
 
-        container.innerHTML = domains.map(domain => this.createDomainCard(domain)).join('');
+        // Sort domains by threat level: Malicious → Suspicious → Clean
+        const sortedDomains = domains.sort((a, b) => {
+            const threatOrder = { 'malicious': 0, 'suspicious': 1, 'safe': 2, 'unknown': 3 };
+            return threatOrder[a.threat_level] - threatOrder[b.threat_level];
+        });
+
+        container.innerHTML = sortedDomains.map(domain => this.createDomainCard(domain)).join('');
     }
 
     updateAIAnalysis() {
-        const container = document.getElementById('ai-analysis-content');
-        const { aiAnalysis } = this.scanData.analysis;
-
-        if (!aiAnalysis || aiAnalysis.error) {
-            container.innerHTML = `
-                <div class="error-message">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    AI analysis failed: ${aiAnalysis?.error || 'Unknown error'}
+        const { analysis } = this.scanData;
+        const content = document.getElementById('ai-analysis-content');
+        const startButton = document.getElementById('start-ai-analysis');
+        const loading = document.getElementById('ai-analysis-loading');
+        
+        if (!content) return;
+        
+        if (analysis.aiAnalysis) {
+            // Show AI analysis results
+            if (analysis.aiAnalysis.error) {
+                const errorMessage = analysis.aiAnalysis.error;
+                const isApiKeyError = errorMessage.includes('API key') || errorMessage.includes('401') || errorMessage.includes('Invalid');
+                
+                content.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="error-content">
+                            <div class="error-title">AI analysis failed</div>
+                            <div class="error-description">${errorMessage}</div>
+                            ${isApiKeyError ? `
+                                <button class="settings-button" onclick="cyberScanAIPopup.openSettings()">
+                                    <i class="fas fa-cog"></i>
+                                    Configure Anthropic API Key
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = this.createAIAnalysisContent(analysis.aiAnalysis);
+            }
+            
+            // Hide button and loading, show results
+            if (startButton) startButton.style.display = 'none';
+            if (loading) loading.style.display = 'none';
+            
+            // Update last scan time
+            const lastScan = document.getElementById('analysis-last-scan');
+            if (lastScan) {
+                lastScan.textContent = `Analyzed: ${this.getTimeAgo(this.scanData.scanTime)}`;
+            }
+        } else if (analysis && (analysis.ips?.length > 0 || analysis.domains?.length > 0)) {
+            // Show button to start AI analysis
+            content.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-brain"></i>
+                    <p>Threat intelligence data is ready. Click "Start AI Analysis" to get AI-powered security insights.</p>
                 </div>
             `;
+            if (startButton) startButton.style.display = 'block';
+            if (loading) loading.style.display = 'none';
+        } else {
+            // No scan data yet
+            content.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-brain"></i>
+                    <p>No analysis available yet. First scan the page for IPs and domains, then click "Start AI Analysis" for AI-powered threat insights.</p>
+                </div>
+            `;
+            if (startButton) startButton.style.display = 'none';
+            if (loading) loading.style.display = 'none';
+        }
+    }
+
+    async startAIAnalysis() {
+        if (!this.scanData || !this.scanData.analysis) {
+            this.showError('No scan data available. Please scan the page first.');
             return;
         }
 
-        container.innerHTML = this.createAIAnalysisContent(aiAnalysis);
+        const startButton = document.getElementById('start-ai-analysis');
+        const loading = document.getElementById('ai-analysis-loading');
+        const content = document.getElementById('ai-analysis-content');
+
+        try {
+            // Show loading state
+            if (startButton) startButton.style.display = 'none';
+            if (loading) loading.style.display = 'flex';
+
+            // Send request to background script
+            const response = await chrome.runtime.sendMessage({
+                action: 'startAIAnalysis',
+                data: this.scanData
+            });
+
+            if (!response.success) {
+                throw new Error(response.error || 'AI analysis failed');
+            }
+
+            // Update scan data with AI analysis
+            this.scanData.analysis.aiAnalysis = response.data;
+
+            // Update the interface
+            this.updateAIAnalysis();
+
+        } catch (error) {
+            console.error('Error during AI analysis:', error);
+            
+            // Hide loading and show button again
+            if (loading) loading.style.display = 'none';
+            if (startButton) startButton.style.display = 'block';
+            
+            // Show error in the content area
+            if (content) {
+                content.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="error-content">
+                            <div class="error-title">AI Analysis Failed</div>
+                            <div class="error-description">${error.message}</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
     }
 
     createIPCard(ip) {
@@ -257,8 +462,8 @@ class CyberGuardPopup {
                             <span class="detail-value">${ip.abuse_confidence || 0}% confidence</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">ASN:</span>
-                            <span class="detail-value">${ip.asn || 'Unknown'}</span>
+                            <span class="detail-label">Country:</span>
+                            <span class="detail-value">${ip.whois_country || ip.location || 'Unknown'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">ISP:</span>
@@ -306,6 +511,10 @@ class CyberGuardPopup {
                         <div class="detail-item">
                             <span class="detail-label">VirusTotal:</span>
                             <span class="detail-value">${domain.detections}/${domain.total_engines} engines</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Country:</span>
+                            <span class="detail-value">${domain.whois_country || 'Unknown'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Registrar:</span>
@@ -387,23 +596,11 @@ class CyberGuardPopup {
                 </div>
             ` : ''}
 
-            <div class="analysis-metadata">
-                <div class="metadata-grid">
-                    <div class="metadata-item">
-                        <span>Analysis Date:</span>
-                        <span class="metadata-value">${new Date().toLocaleString()}</span>
-                    </div>
-                    <div class="metadata-item">
-                        <span>Model:</span>
-                        <span class="metadata-value">GPT-4o</span>
-                    </div>
-                    <div class="metadata-item">
-                        <span>Confidence:</span>
-                        <span class="metadata-value success">${aiAnalysis.confidence || 0}%</span>
-                    </div>
-                    <div class="metadata-item">
-                        <span>Processing Time:</span>
-                        <span class="metadata-value">${aiAnalysis.processing_time || 'N/A'}</span>
+            <div class="ai-disclaimer">
+                <div class="disclaimer-grid">
+                    <div class="disclaimer-item">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Disclaimer: AI-generated results may be limited in scope and could contain inaccuracies or misleading information. Use with discretion.
                     </div>
                 </div>
             </div>
@@ -419,11 +616,11 @@ class CyberGuardPopup {
             if (response.success) {
                 this.updateApiStatus(response.status);
             } else {
-                this.updateApiStatus({ virustotal: false, abuseipdb: false, openai: false });
+                this.updateApiStatus({ virustotal: false, abuseipdb: false, anthropic: false });
             }
         } catch (error) {
             console.error('Error checking API status:', error);
-            this.updateApiStatus({ virustotal: false, abuseipdb: false, openai: false });
+            this.updateApiStatus({ virustotal: false, abuseipdb: false, anthropic: false });
         }
     }
 
@@ -431,8 +628,10 @@ class CyberGuardPopup {
         const statusDot = document.getElementById('api-status-dot');
         const statusText = document.getElementById('api-status-text');
         
-        const allOnline = status.virustotal && status.abuseipdb && status.openai;
-        const someOnline = status.virustotal || status.abuseipdb || status.openai;
+        if (!statusDot || !statusText) return;
+        
+        const allOnline = status.virustotal && status.abuseipdb && status.anthropic;
+        const someOnline = status.virustotal || status.abuseipdb || status.anthropic;
         
         if (allOnline) {
             statusDot.className = 'status-dot online';
@@ -449,29 +648,63 @@ class CyberGuardPopup {
     updateFooter() {
         if (this.scanData && this.scanData.scanTime) {
             const timeAgo = this.getTimeAgo(this.scanData.scanTime);
-            document.getElementById('last-scan-time').textContent = timeAgo;
-            document.getElementById('ip-last-scan').textContent = `Last scan: ${timeAgo}`;
-            document.getElementById('domain-last-scan').textContent = `Last scan: ${timeAgo}`;
-            document.getElementById('analysis-last-scan').textContent = `Analyzed: ${timeAgo}`;
+            
+            const lastScanTime = document.getElementById('last-scan-time');
+            if (lastScanTime) {
+                lastScanTime.textContent = timeAgo;
+            }
+            
+            const ipLastScan = document.getElementById('ip-last-scan');
+            if (ipLastScan) {
+                ipLastScan.textContent = `Last scan: ${timeAgo}`;
+            }
+            
+            const domainLastScan = document.getElementById('domain-last-scan');
+            if (domainLastScan) {
+                domainLastScan.textContent = `Last scan: ${timeAgo}`;
+            }
+            
+            const analysisLastScan = document.getElementById('analysis-last-scan');
+            if (analysisLastScan) {
+                analysisLastScan.textContent = `Analyzed: ${timeAgo}`;
+            }
         }
     }
 
     showScanningState() {
-        document.getElementById('loading-spinner').classList.remove('hidden');
-        document.getElementById('scan-status-text').textContent = 'Scanning page...';
+        const loadingSpinner = document.getElementById('loading-spinner');
+        if (loadingSpinner) {
+            loadingSpinner.classList.remove('hidden');
+        }
+        
+        const scanStatusText = document.getElementById('scan-status-text');
+        if (scanStatusText) {
+            scanStatusText.textContent = 'Scanning page...';
+        }
         
         const rescanBtn = document.getElementById('rescan-btn');
-        rescanBtn.disabled = true;
-        rescanBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
+        if (rescanBtn) {
+            rescanBtn.disabled = true;
+            rescanBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
+        }
     }
 
     hideScanningState() {
-        document.getElementById('loading-spinner').classList.add('hidden');
-        document.getElementById('scan-status-text').textContent = 'Scan complete';
+        const loadingSpinner = document.getElementById('loading-spinner');
+        if (loadingSpinner) {
+            loadingSpinner.classList.add('hidden');
+        }
+        
+        const scanStatusText = document.getElementById('scan-status-text');
+        if (scanStatusText) {
+            scanStatusText.textContent = 'Scan complete';
+        }
         
         const rescanBtn = document.getElementById('rescan-btn');
-        rescanBtn.disabled = false;
-        rescanBtn.innerHTML = '<i class="fas fa-redo-alt"></i> Rescan';
+        if (rescanBtn) {
+            rescanBtn.disabled = false;
+            rescanBtn.innerHTML = '<i class="fas fa-redo-alt"></i> Rescan';
+        }
     }
 
     showError(message) {
@@ -556,19 +789,176 @@ class CyberGuardPopup {
     }
 
     getTimeAgo(timestamp) {
+        if (!timestamp) return 'Never';
+        
         const now = Date.now();
         const diff = now - timestamp;
-        const minutes = Math.floor(diff / 60000);
-        const hours = Math.floor(diff / 3600000);
+        const minutes = Math.floor(diff / (1000 * 60));
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         
         if (minutes < 1) return 'Just now';
-        if (minutes < 60) return `${minutes} min ago`;
-        if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-        return new Date(timestamp).toLocaleDateString();
+        if (minutes < 60) return `${minutes}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        return `${days}d ago`;
+    }
+
+    // Settings Modal Methods
+    async openSettings() {
+        const modal = document.getElementById('settings-modal');
+        if (!modal) return;
+
+        // Load current API keys
+        await this.loadApiKeys();
+        
+        // Show modal with animation
+        modal.classList.add('show');
+        
+        // Focus first input
+        const firstInput = document.getElementById('virustotal-key');
+        if (firstInput) {
+            setTimeout(() => firstInput.focus(), 100);
+        }
+    }
+
+    closeSettings() {
+        const modal = document.getElementById('settings-modal');
+        if (!modal) return;
+
+        modal.classList.remove('show');
+        
+        // Clear all inputs for security
+        document.getElementById('virustotal-key').value = '';
+        document.getElementById('abuseipdb-key').value = '';
+        document.getElementById('anthropic-key').value = '';
+        
+        // Reset all password fields to hidden
+        this.resetPasswordVisibility();
+    }
+
+    async loadApiKeys() {
+        try {
+            const result = await chrome.storage.local.get(['apiKeys']);
+            const apiKeys = result.apiKeys || {};
+            
+            document.getElementById('virustotal-key').value = apiKeys.virustotal || '';
+            document.getElementById('abuseipdb-key').value = apiKeys.abuseipdb || '';
+            document.getElementById('anthropic-key').value = apiKeys.anthropic || '';
+        } catch (error) {
+            console.error('Error loading API keys:', error);
+        }
+    }
+
+    async saveSettings() {
+        const virustotalKey = document.getElementById('virustotal-key').value.trim();
+        const abuseipdbKey = document.getElementById('abuseipdb-key').value.trim();
+        const anthropicKey = document.getElementById('anthropic-key').value.trim();
+
+        // Validate at least one API key is provided
+        if (!virustotalKey && !abuseipdbKey && !anthropicKey) {
+            this.showSettingsError('Please provide at least one API key.');
+            return;
+        }
+
+        try {
+            // Save to Chrome storage
+            await chrome.storage.local.set({
+                apiKeys: {
+                    virustotal: virustotalKey,
+                    abuseipdb: abuseipdbKey,
+                    anthropic: anthropicKey
+                }
+            });
+
+            // Notify background script of new keys
+            chrome.runtime.sendMessage({
+                action: 'updateApiKeys',
+                keys: {
+                    virustotal: virustotalKey,
+                    abuseipdb: abuseipdbKey,
+                    anthropic: anthropicKey
+                }
+            });
+
+            this.showSettingsSuccess('API keys saved successfully!');
+            
+            // Close modal after brief delay
+            setTimeout(() => {
+                this.closeSettings();
+                // Refresh API status
+                this.checkApiStatus();
+            }, 1500);
+
+        } catch (error) {
+            console.error('Error saving API keys:', error);
+            this.showSettingsError('Failed to save API keys. Please try again.');
+        }
+    }
+
+    togglePasswordVisibility(targetId) {
+        const input = document.getElementById(targetId);
+        const button = document.querySelector(`[data-target="${targetId}"]`);
+        const icon = button.querySelector('i');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+
+    resetPasswordVisibility() {
+        const inputs = ['virustotal-key', 'abuseipdb-key', 'anthropic-key'];
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            const button = document.querySelector(`[data-target="${id}"]`);
+            const icon = button?.querySelector('i');
+            
+            if (input) input.type = 'password';
+            if (icon) icon.className = 'fas fa-eye';
+        });
+    }
+
+    showSettingsSuccess(message) {
+        this.showSettingsMessage(message, 'success');
+    }
+
+    showSettingsError(message) {
+        this.showSettingsMessage(message, 'error');
+    }
+
+    showSettingsMessage(message, type) {
+        // Remove any existing messages
+        const existingMessage = document.querySelector('.settings-message');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+
+        // Create new message element
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `settings-message ${type}`;
+        messageDiv.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+            ${message}
+        `;
+
+        // Insert before modal footer
+        const modalFooter = document.querySelector('.modal-footer');
+        modalFooter.parentNode.insertBefore(messageDiv, modalFooter);
+
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.remove();
+            }
+        }, 3000);
     }
 }
 
 // Initialize popup when DOM is loaded
+let cyberScanAIPopup;
 document.addEventListener('DOMContentLoaded', () => {
-    new CyberGuardPopup();
+    cyberScanAIPopup = new CyberScanAIPopup();
 });

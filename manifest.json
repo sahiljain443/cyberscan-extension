@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "CyberScanAI - AI-Powered Security Analysis",
+  "version": "2.0.0",
+  "description": "Advanced cybersecurity extension with AI-powered threat analysis, privacy-first PII protection, and comprehensive threat intelligence",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://api.anthropic.com/*",
+    "https://www.virustotal.com/*",
+    "https://api.abuseipdb.com/*"
+  ],
+  "background": {
+    "service_worker": "chrome-extension/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["chrome-extension/content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "chrome-extension/popup.html",
+    "default_title": "CyberScanAI - AI Security Analysis",
+    "default_icon": {
+      "16": "chrome-extension/icons/icon16.png",
+      "32": "chrome-extension/icons/icon32.png",
+      "48": "chrome-extension/icons/icon48.png",
+      "128": "chrome-extension/icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "chrome-extension/icons/icon16.png",
+    "32": "chrome-extension/icons/icon32.png",
+    "48": "chrome-extension/icons/icon48.png",
+    "128": "chrome-extension/icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["chrome-extension/content.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+} 
