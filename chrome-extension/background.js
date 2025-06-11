@@ -1,7 +1,7 @@
 // Background service worker for API calls and data processing
 let VIRUSTOTAL_API_KEY = '';
 let ABUSEIPDB_API_KEY = '';
-let ANTHROPIC_API_KEY = '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';
+let ANTHROPIC_API_KEY = '';
 
 // Store scan results
 let lastScanData = null;
