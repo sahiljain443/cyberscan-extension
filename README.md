@@ -113,30 +113,6 @@ Configure API keys directly in the extension settings (click the gear icon):
 3. Navigate to the API section
 4. Generate a new API key
 
-## 🖥️ Backend Server Setup
-
-The extension requires a backend server for API integrations:
-
-1. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
-
-2. **Set Environment Variables**:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys
-   ```
-
-3. **Start the Server**:
-   ```bash
-   npm run dev
-   ```
-
-4. **Verify Server**:
-   - Server runs on `http://localhost:5000`
-   - Visit the URL to see the project documentation page
-
 ## 📖 Usage Guide
 
 ### Basic Usage
@@ -208,24 +184,21 @@ cyberscan-extension/
 ├── chrome-extension/          # Chrome extension files
 │   ├── manifest.json         # Extension manifest
 │   ├── popup.html           # Extension popup interface
-│   ├── popup.js             # Popup functionality
-│   ├── background.js        # Background service worker
-│   ├── content.js           # Content script for page analysis
-│   └── styles.css           # Extension styling
-├── server/                   # Backend API server
-│   ├── apis/                # API route handlers
-│   │   ├── threat-intelligence.ts
-│   │   └── openai-analysis.ts
-│   ├── index.ts             # Server entry point
-│   └── routes.ts            # Route configuration
-├── client/                   # Web interface (documentation)
-│   └── src/
-│       └── pages/
-│           └── home.tsx     # Landing page
-├── shared/                   # Shared types and schemas
-│   ├── types.ts             # TypeScript interfaces
-│   └── schema.ts            # Data schemas
-└── README.md                # This file
+│   ├── popup.js             # Popup functionality and UI logic
+│   ├── background.js        # Background service worker and API integration
+│   ├── content.js           # Content script for webpage analysis
+│   ├── styles.css           # Extension styling and themes
+│   └── icons/               # Extension icons
+├── .cursor/                  # Cursor IDE configuration
+│   └── rules/               # Development rules and guidelines
+├── generated-icon.png        # Extension icon
+├── manifest.json            # Root manifest file
+├── package.json             # Project configuration
+├── README.md                # Comprehensive project documentation
+├── INSTALLATION.md          # Step-by-step installation guide
+├── CONTRIBUTING.md          # Contribution guidelines
+├── LICENSE                  # MIT license
+└── .gitignore              # Git ignore rules
 ```
 
 ## 🔧 Development

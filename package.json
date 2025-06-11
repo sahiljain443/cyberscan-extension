@@ -1,12 +1,39 @@
 {
-  "name": "cyberscan-extension",
-  "version": "1.0.0",
-  "description": "Chrome extension for cybersecurity threat analysis",
+  "name": "cyberscanai-extension",
+  "version": "2.0.0",
+  "description": "CyberScanAI - Chrome extension for AI-powered cybersecurity threat analysis with privacy-first PII protection",
   "type": "module",
   "license": "MIT",
-  "keywords": ["chrome-extension", "cybersecurity", "threat-intelligence", "security-analysis"],
-  "author": "Security Analyst",
-  "scripts": {},
+  "keywords": [
+    "chrome-extension",
+    "cybersecurity",
+    "threat-intelligence",
+    "security-analysis",
+    "ai-powered",
+    "claude",
+    "anthropic",
+    "privacy-protection",
+    "pii-deidentification",
+    "virustotal",
+    "abuseipdb"
+  ],
+  "author": "sahiljain443",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sahiljain443/cyberscan-extension.git"
+  },
+  "homepage": "https://github.com/sahiljain443/cyberscan-extension#readme",
+  "bugs": {
+    "url": "https://github.com/sahiljain443/cyberscan-extension/issues"
+  },
+  "engines": {
+    "chrome": ">=88"
+  },
+  "scripts": {
+    "build": "echo 'Extension is ready to load - no build process required'",
+    "test": "echo 'Load extension in Chrome Developer mode for testing'",
+    "lint": "echo 'Manual code review recommended'"
+  },
   "devDependencies": {},
   "dependencies": {}
 }
